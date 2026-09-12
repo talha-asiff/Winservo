@@ -24,13 +24,30 @@ int main()
     listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     // IPPROTO_TCP = 6 : TCP protocol |||| If we put 0 here system automatically choose dafault protocol for that port
     if (listenSocket == INVALID_SOCKET) {
-        cerr << "Socket creation failed: " << WSAGetLastError() << std::endl;
+        cerr << "Socket creation failed: " << WSAGetLastError() <<endl;
         WSACleanup();
         return INVALID_SOCKET;
     }
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY; // Listen on all network interfaces
     serverAddr.sin_port = htons(5555);
-
+    if ( bind(listenSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR ) {
+        /*
+        Binding server config. with listenSocket
+        sockaddr typecast to make it generic
+        */
+        cerr << "Bind failed: " << WSAGetLastError() <<endl;
+        closesocket(listenSocket);
+        WSACleanup();
+        return INVALID_SOCKET;
+    }
+    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+        //SOMAXCONN here bcz idk how many clients r gonna send requests all at once
+        cerr << "Listen failed: " << WSAGetLastError() <<endl;
+        closesocket(listenSocket);
+        WSACleanup();
+        return INVALID_SOCKET;
+    }
+    cout << "server running..."<<endl;
     getch();
 }
