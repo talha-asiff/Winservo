@@ -58,7 +58,35 @@ int main()
             continue;
         }
         char buffer[BUFFER_SIZE] = {0};
-        int bytesReceived = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
+        int bytes = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
+        if(bytes > 0){
+            cout << "\n--- Received Request ---\n" << buffer <<endl;
+            string htmlContent = 
+                "<!DOCTYPE html>"
+                "<html><head><title>Winsock HTTP Server</title></head>"
+                "<body><h1>Hello from C++ Winsock Server!</h1>"
+                "<p>This page was served by a raw C++ socket server.</p></body></html>";
+            string httpResponse = 
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/html\r\n"
+                "Content-Length: " + to_string(htmlContent.length()) + "\r\n"
+                "Connection: close\r\n\r\n" + htmlContent;
+            /*
+                HTTP/1.1: Protocol version being used.
+                200: Numeric status code indicating success.
+                OK: Human-readable explanation of the status code.
+
+                Metadata headers : 
+                following the file is a text or HTML file, it's length is fla, and inform the browser that conncetion will be closed after sending this data,
+                The first \r\n terminates the last header line
+                The second \r\n creates a completely empty line
+
+                < Content or Body (Payload) >
+                The actual content being returned (HTML page, JSON, image file, plain text, etc).
+            */
+           
+            send(clientSocket, httpResponse.c_str(), static_cast<int>(httpResponse.length()), 0);
+        }
     }
     getch();
 }
