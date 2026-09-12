@@ -5,13 +5,14 @@
 #include "titleScreen.cpp"
 using namespace std;
 #pragma comment(lib, "ws2_32.lib")
+#define BUFFER_SIZE 4096
 int main()
 {
     title();
     WSADATA wsaData;
     SOCKET listenSocket = INVALID_SOCKET;
     SOCKET clientSocket = INVALID_SOCKET;
-    sockaddr_in serverAddr; //struct to save all server configurations
+    sockaddr_in serverAddr, clientAddr; //struct to save all server configurations
     try{
         if(WSAStartup(MAKEWORD(2,2), &wsaData) != 0){
 		    throw runtime_error("Error : " + to_string(WSAGetLastError()));
@@ -49,5 +50,15 @@ int main()
         return INVALID_SOCKET;
     }
     cout << "server running..."<<endl;
+    int l = sizeof(clientAddr);
+    while(1){
+        clientSocket = accept(listenSocket, (sockaddr*)&clientAddr, &l);
+        if (clientSocket == INVALID_SOCKET) {
+            cerr << "Accept failed: " << WSAGetLastError() <<endl;
+            continue;
+        }
+        char buffer[BUFFER_SIZE] = {0};
+        int bytesReceived = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
+    }
     getch();
 }
