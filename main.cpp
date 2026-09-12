@@ -84,9 +84,13 @@ int main()
                 < Content or Body (Payload) >
                 The actual content being returned (HTML page, JSON, image file, plain text, etc).
             */
-           
-            send(clientSocket, httpResponse.c_str(), static_cast<int>(httpResponse.length()), 0);
+
+            send(clientSocket, httpResponse.c_str(), (int)(httpResponse.length()), 0);
         }
+        closesocket(clientSocket);
     }
+    closesocket(listenSocket);
+    WSACleanup();
     getch();
+    return EXIT_SUCCESS;
 }
