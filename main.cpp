@@ -11,10 +11,13 @@ int main()
 {
     title();
     string path;
-    cout << "example : path/to/your/site"<<endl<<"Try : ./site";
+    cout << "example : path/to/your/site"<<endl<<"Try : ./site\n";
     cout << "Enter path to host : ";
     cin >> path;
     ifstream file(path + (path[path.length() - 1] == '/' ? "Index.html" : "/Index.html"));
+    cout << "Enter port : ";
+    int p;
+    cin >> p;
     WSADATA wsaData;
     SOCKET listenSocket = INVALID_SOCKET;
     SOCKET clientSocket = INVALID_SOCKET;
@@ -37,7 +40,7 @@ int main()
     }
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY; // Listen on all network interfaces
-    serverAddr.sin_port = htons(5555);
+    serverAddr.sin_port = htons(p);
     if ( bind(listenSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR ) {
         /*
         Binding server config. with listenSocket
@@ -76,6 +79,8 @@ int main()
                 "Content-Length: " + to_string(htmlContent.length()) + "\r\n"
                 "Connection: close\r\n\r\n" + htmlContent;
             /*
+                Notes : 
+
                 HTTP/1.1 is the Protocol version being used.
                 200: Numeric status code indicating success.
                 OK: Human-readable explanation of the status code.
