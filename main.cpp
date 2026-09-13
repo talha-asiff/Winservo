@@ -11,7 +11,7 @@ int main()
 {
     title();
     string path;
-    cout << "example : path/to/your/site"<<endl;
+    cout << "example : path/to/your/site"<<endl<<"Try : ./site";
     cout << "Enter path to host : ";
     cin >> path;
     ifstream file(path + (path[path.length() - 1] == '/' ? "Index.html" : "/Index.html"));
