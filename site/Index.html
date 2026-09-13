@@ -13,9 +13,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
-    /* ==========================================================================
-       1. CSS VARIABLES & RESET (styles.css)
-       ========================================================================== */
     :root {
       --bg-dark: #040814;
       --card-bg: rgba(10, 18, 38, 0.65);
@@ -473,19 +470,13 @@
 
     </div>
   </div>
-
-  <!-- Interactive Feedback Toast -->
   <div class="toast" id="toast">
     <i class="fa-solid fa-circle-check" style="color: #34d399;"></i>
     <span>Redirecting to GitHub... Thank you for the support!</span>
   </div>
 
   <script>
-    /* ==========================================================================
-       4. INTERACTIVE NETWORK CANVAS & INTERACTION LOGIC (script.js)
-       ========================================================================== */
     document.addEventListener('DOMContentLoaded', () => {
-      // --- Particle Network Background Simulation ---
       const canvas = document.getElementById('network-canvas');
       const ctx = canvas.getContext('2d');
 
@@ -535,8 +526,6 @@
 
       function animate() {
         ctx.clearRect(0, 0, width, height);
-
-        // Draw connections representing C/C++ network socket connections
         for (let i = 0; i < particles.length; i++) {
           particles[i].update();
           particles[i].draw();
@@ -545,7 +534,6 @@
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-
             if (distance < 130) {
               ctx.beginPath();
               ctx.moveTo(particles[i].x, particles[i].y);
@@ -556,20 +544,14 @@
             }
           }
         }
-
-        requestAnimationFrame(animate);
-      }
-
+      requestAnimationFrame(animate);}
       initParticles();
       animate();
-
-      // --- Star Button Toast & Click Interaction ---
       const starBtn = document.getElementById('starBtn');
       const toast = document.getElementById('toast');
 
       if (starBtn && toast) {
         starBtn.addEventListener('click', (e) => {
-          // Show feedback toast
           toast.classList.add('show');
           setTimeout(() => {
             toast.classList.remove('show');
