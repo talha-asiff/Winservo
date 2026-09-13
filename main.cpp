@@ -67,8 +67,9 @@ int main()
         int bytes = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
         if(bytes > 0){
             cout << "\n--- Received Request ---\n" << buffer <<endl;
+            string line = "";
             string htmlContent = "";
-            while(getline(file, htmlContent)){}
+            while(getline(file, line)){ htmlContent += line;}
             string httpResponse = 
                 "HTTP/1.1 200 OK\r\n"
                 "Content-Type: text/html\r\n"
