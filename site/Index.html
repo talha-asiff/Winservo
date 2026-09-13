@@ -1,65 +1,582 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live at C/C++ Server</title>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Winservo - Live C/C++ Server</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       1. CSS VARIABLES & RESET (styles.css)
+       ========================================================================== */
+    :root {
+      --bg-dark: #040814;
+      --card-bg: rgba(10, 18, 38, 0.65);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --card-glow: rgba(56, 189, 248, 0.15);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-blue: #38bdf8;
+      --accent-cyan: #22d3ee;
+      --accent-green: #10b981;
+      --accent-purple: #818cf8;
+      --github-black: #181717;
+      --github-hover: #24292e;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Background Network Canvas */
+    #network-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       2. MAIN CARD & LAYOUT
+       ========================================================================== */
+    .container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 580px;
+      padding: 24px;
+      margin: 0 auto;
+    }
+
+    /* Glassmorphic Container */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 40px 32px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+                  0 0 40px var(--card-glow);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .glass-card:hover {
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6),
+                  0 0 50px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Status Badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #34d399;
+      margin-bottom: 28px;
+      letter-spacing: 0.3px;
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 0 10px var(--accent-green);
+    }
+
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    /* Logo Styling & Floating Animation */
+    .logo-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 24px;
+      perspective: 1000px;
+    }
+
+    .server-logo {
+      max-width: 280px;
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+      transition: transform 0.5s ease;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .logo-wrapper:hover .server-logo {
+      transform: scale(1.04) rotateX(4deg) rotateY(-4deg);
+    }
+
+    /* Titles & Headings */
+    .title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 30%, #a5f3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    /* Author Tag */
+    .author-tag {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      margin-bottom: 32px;
+      font-weight: 500;
+    }
+
+    .heart-icon {
+      color: #ef4444;
+      display: inline-block;
+      animation: heartbeat 1.5s infinite ease-in-out;
+    }
+
+    .author-name {
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-decoration: none;
+      position: relative;
+    }
+
+    .author-name::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background-color: var(--accent-blue);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      transform-origin: right;
+    }
+
+    .author-name:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* Action Buttons Container */
+    .action-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Primary Button */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      color: #ffffff;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Star Button - Animated Border & Glow */
+    .btn-star {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #fef08a;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      z-index: 1;
+    }
+
+    /* Animated Border Glow for Star Button */
+    .btn-star::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        #f59e0b 90deg,
+        transparent 180deg,
+        #38bdf8 270deg,
+        transparent 360deg
+      );
+      animation: rotate 4s linear infinite;
+      z-index: -2;
+    }
+
+    .btn-star::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      background: #0f172a;
+      border-radius: 12px;
+      z-index: -1;
+      transition: background 0.3s ease;
+    }
+
+    .btn-star:hover::after {
+      background: #1e293b;
+    }
+
+    .btn-star:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+      color: #ffffff;
+    }
+
+    .star-icon {
+      color: #f59e0b;
+      transition: transform 0.3s ease;
+    }
+
+    .btn-star:hover .star-icon {
+      transform: scale(1.25) rotate(15deg);
+    }
+
+    /* Star counter badge */
+    .star-count {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-left: 4px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Toast Notification for Interactive Feedback */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--accent-green);
+      color: #ecfdf5;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 100;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       3. ANIMATIONS & KEYFRAMES
+       ========================================================================== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2.2);
+        opacity: 0;
+      }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+      }
+    }
+
+    @keyframes heartbeat {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.25);
+      }
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Mobile Responsive Adjustments */
+    @media (max-width: 480px) {
+      .glass-card {
+        padding: 32px 20px;
+        border-radius: 20px;
+      }
+
+      .title {
+        font-size: 1.5rem;
+      }
+
+      .server-logo {
+        max-width: 220px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Animated Network Socket Canvas Background -->
-    <canvas id="bg-canvas"></canvas>
+  <!-- Background Animated Network Canvas -->
+  <canvas id="network-canvas"></canvas>
 
-    <!-- Main Content Container -->
-    <div class="container">
-        <main class="card">
-            
-            <!-- Live Status Indicator -->
-            <div class="status-badge">
-                <span class="pulse-dot"></span>
-                <span>Live at C/C++ Server</span>
-            </div>
+  <!-- Central Card Container -->
+  <div class="container">
+    <div class="glass-card">
+      
+      <!-- Status Badge -->
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span>Live at C/C++ Server</span>
+      </div>
 
-            <!-- Header Text -->
-            <h1 class="title">Winservo</h1>
-            <p class="subtitle">High-Performance Socket Server Engine</p>
+      <!-- Main Titles -->
+      <h1 class="title">Winservo Web Server</h1>
+      <p class="subtitle">Powered by C/C++ Native Socket Architecture</p>
 
-            <!-- Credit & Info -->
-            <div class="author-tag">
-                Crafted by <span class="author-name">Talha Asif</span>
-            </div>
+      <!-- Author Attribution -->
+      <div class="author-tag">
+        <span>Made with</span>
+        <i class="fa-solid fa-heart heart-icon"></i>
+        <span>by</span>
+        <a href="https://github.com/talha-asiff" target="_blank" rel="noopener noreferrer" class="author-name">
+          Talha Asif
+        </a>
+      </div>
 
-            <!-- Call to Action Buttons -->
-            <div class="actions">
-                <a href="https://github.com/talha-asiff" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                    <i class="fa-brands fa-github"></i>
-                    <span>Visit GitHub</span>
-                </a>
+      <!-- Action Buttons -->
+      <div class="action-group">
+        <a href="https://github.com/talha-asiff" target="_blank" rel="noopener noreferrer" class="btn-primary">
+          <i class="fa-brands fa-github fa-lg"></i>
+          <span>Visit GitHub Profile</span>
+        </a>
 
-                <button id="star-btn" class="btn btn-secondary" onclick="handleStarClick()">
-                    <i class="fa-regular fa-star" id="star-icon"></i>
-                    <span id="star-text">Give it a star on GitHub</span>
-                </button>
-            </div>
+        <a href="https://github.com/talha-asiff" target="_blank" rel="noopener noreferrer" class="btn-star" id="starBtn">
+          <i class="fa-solid fa-star star-icon"></i>
+          <span>Give it a star on GitHub</span>
+          <span class="star-count" id="starCount">⭐ +1</span>
+        </a>
+      </div>
 
-            <!-- Toast Notification -->
-            <div id="toast" class="toast">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>Redirecting to GitHub to star...</span>
-            </div>
-
-        </main>
-
-        <footer>
-            <p>&copy; 2026 Talha Asif • Built with C/C++ Sockets & Low-Level Architecture</p>
-        </footer>
     </div>
+  </div>
 
-    <!-- Custom JS -->
-    <script src="script.js"></script>
+  <!-- Interactive Feedback Toast -->
+  <div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check" style="color: #34d399;"></i>
+    <span>Redirecting to GitHub... Thank you for the support!</span>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       4. INTERACTIVE NETWORK CANVAS & INTERACTION LOGIC (script.js)
+       ========================================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Particle Network Background Simulation ---
+      const canvas = document.getElementById('network-canvas');
+      const ctx = canvas.getContext('2d');
+
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        initParticles();
+      });
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.vx = (Math.random() - 0.5) * 0.8;
+          this.vy = (Math.random() - 0.5) * 0.8;
+          this.radius = Math.random() * 2 + 1;
+          this.color = '#38bdf8';
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          if (this.x < 0 || this.x > width) this.vx *= -1;
+          if (this.y < 0 || this.y > height) this.vy *= -1;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+          ctx.fill();
+        }
+      }
+
+      let particles = [];
+      function initParticles() {
+        particles = [];
+        const count = Math.min(Math.floor((width * height) / 12000), 65);
+        for (let i = 0; i < count; i++) {
+          particles.push(new Particle());
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw connections representing C/C++ network socket connections
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 130) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(56, 189, 248, ${1 - distance / 130 * 0.8})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      initParticles();
+      animate();
+
+      // --- Star Button Toast & Click Interaction ---
+      const starBtn = document.getElementById('starBtn');
+      const toast = document.getElementById('toast');
+
+      if (starBtn && toast) {
+        starBtn.addEventListener('click', (e) => {
+          // Show feedback toast
+          toast.classList.add('show');
+          setTimeout(() => {
+            toast.classList.remove('show');
+          }, 3500);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
