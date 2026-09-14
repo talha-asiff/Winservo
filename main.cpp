@@ -17,9 +17,10 @@ class ConnectionLog{
         this->listening = listening;
         this->accepting = accepting;
         this->port = port;
+        this->path = path;
     }
     string info(){
-        return ("Listening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + path);
+        return ("Listening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + this->path);
     }
     ofstream report(){
         return ofstream("report.txt", ios::app);
