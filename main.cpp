@@ -7,6 +7,24 @@
 using namespace std;
 #pragma comment(lib, "ws2_32.lib")
 #define BUFFER_SIZE 4096
+class ConnectionLog{
+    private:
+    SOCKET listening, accepting;
+    string path;
+    int port;
+    public:
+    ConnectionLog(SOCKET listening, SOCKET accepting, int port, string path){
+        this->listening = listening;
+        this->accepting = accepting;
+        this->port = port;
+    }
+    string info(){
+        return ("Listening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + path);
+    }
+    ofstream report(){
+        return ofstream("report.txt");
+    }
+};
 int main()
 {
     title();
