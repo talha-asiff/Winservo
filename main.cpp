@@ -22,7 +22,14 @@ class ConnectionLog{
         return ("Listening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + path);
     }
     ofstream report(){
-        return ofstream("report.txt");
+        return ofstream("report.txt", ios::app);
+    }
+};
+class generateReport : public ConnectionLog{
+    public:
+    generateReport(SOCKET listening, SOCKET accepting, int port, string path) : ConnectionLog(listening, accepting, port, path){
+        ofstream file = report();
+        file << info();
     }
 };
 int main()
