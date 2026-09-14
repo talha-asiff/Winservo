@@ -1,0 +1,5 @@
+Listening socket : 312
+Accepting socket : 18446744073709551615
+Port : 8080
+AFINET MODE
+Path live : 

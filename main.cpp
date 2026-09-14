@@ -29,6 +29,9 @@ class generateReport : public ConnectionLog{
     public:
     generateReport(SOCKET listening, SOCKET accepting, int port, string path) : ConnectionLog(listening, accepting, port, path){
         ofstream file = report();
+        if(file.is_open()){
+            cout << "Connection report saved " << endl;
+        }
         file << info();
     }
 };
@@ -76,6 +79,7 @@ int main()
         WSACleanup();
         return INVALID_SOCKET;
     }
+    generateReport(listenSocket, clientSocket, p, path);
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         //SOMAXCONN here bcz idk how many clients r gonna send requests all at once
         cerr << "Listen failed: " << WSAGetLastError() <<endl;
