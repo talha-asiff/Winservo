@@ -77,10 +77,10 @@ int main()
         Binding server config. with listenSocket
         sockaddr typecast to make it generic
         */
-        cerr << "Bind failed: " << WSAGetLastError() <<endl;
-        closesocket(listenSocket);
-        WSACleanup();
-        return INVALID_SOCKET;
+       cerr << "Bind failed: " << WSAGetLastError() <<endl;
+       closesocket(listenSocket);
+       WSACleanup();
+       return INVALID_SOCKET;
     }
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         //SOMAXCONN here bcz idk how many clients r gonna send requests all at once
@@ -89,6 +89,9 @@ int main()
         WSACleanup();
         return INVALID_SOCKET;
     }
+    string line = "";
+    string htmlContent = "";
+    while(getline(file, line)){ htmlContent += line;} //already fetched html content
     cout << "server running..."<<endl;
     int l = sizeof(clientAddr);
     while(1){
@@ -101,10 +104,7 @@ int main()
         int bytes = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
         generateReport(listenSocket, clientSocket, p, path, buffer);
         if(bytes > 0){
-            cout << "\n--- Received Request ---\n" << buffer <<endl;
-            string line = "";
-            string htmlContent = "";
-            while(getline(file, line)){ htmlContent += line;} //already fetched html content
+            //cout << "\n--- Received Request ---\n" << buffer <<endl;
             string httpResponse = 
             "HTTP/1.1 200 OK\r\n"
             "Content-Type: text/html\r\n"
@@ -126,7 +126,7 @@ int main()
             */
 
             send(clientSocket, httpResponse.c_str(), (int)(httpResponse.length()), 0);
-            //cout << httpResponse << endl;
+            cout << htmlContent << endl;
         }
         closesocket(clientSocket);
     }
