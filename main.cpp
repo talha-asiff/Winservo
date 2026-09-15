@@ -104,7 +104,7 @@ int main()
         int bytes = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
         generateReport(listenSocket, clientSocket, p, path, buffer);
         if(bytes > 0){
-            //cout << "\n--- Received Request ---\n" << buffer <<endl;
+            cout << "\n--- Received Request ---\n" << buffer <<endl;
             string httpResponse = 
             "HTTP/1.1 200 OK\r\n"
             "Content-Type: text/html\r\n"
@@ -126,7 +126,6 @@ int main()
             */
 
             send(clientSocket, httpResponse.c_str(), (int)(httpResponse.length()), 0);
-            cout << htmlContent << endl;
         }
         closesocket(clientSocket);
     }
