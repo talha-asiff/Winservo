@@ -11,16 +11,18 @@ class ConnectionLog{
     private:
     SOCKET listening, accepting;
     string path;
+    string buff;
     int port;
     public:
-    ConnectionLog(SOCKET listening, SOCKET accepting, int port, string path){
+    ConnectionLog(SOCKET listening, SOCKET accepting, int port, string path, string buff){
         this->listening = listening;
         this->accepting = accepting;
         this->port = port;
         this->path = path;
+        this->buff = buff;
     }
     string info(){
-        return ("Listening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + this->path);
+        return ("NEW CONNECTION ESTABLISHED \nListening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + this->path + "\n" + this->buff);
     }
     ofstream report(){
         return ofstream("report.txt", ios::app);
@@ -28,7 +30,7 @@ class ConnectionLog{
 };
 class generateReport : public ConnectionLog{
     public:
-    generateReport(SOCKET listening, SOCKET accepting, int port, string path) : ConnectionLog(listening, accepting, port, path){
+    generateReport(SOCKET listening, SOCKET accepting, int port, string path, string buff) : ConnectionLog(listening, accepting, port, path, buff){
         ofstream file = report();
         if(file.is_open()){
             cout << "Connection report saved " << endl;
@@ -80,7 +82,6 @@ int main()
         WSACleanup();
         return INVALID_SOCKET;
     }
-    generateReport(listenSocket, clientSocket, p, path);
     if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         //SOMAXCONN here bcz idk how many clients r gonna send requests all at once
         cerr << "Listen failed: " << WSAGetLastError() <<endl;
@@ -98,16 +99,17 @@ int main()
         }
         char buffer[BUFFER_SIZE] = {0};
         int bytes = recv(clientSocket, buffer, BUFFER_SIZE - 1, 0);
+        generateReport(listenSocket, clientSocket, p, path, buffer);
         if(bytes > 0){
             cout << "\n--- Received Request ---\n" << buffer <<endl;
             string line = "";
             string htmlContent = "";
             while(getline(file, line)){ htmlContent += line;}
             string httpResponse = 
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: text/html\r\n"
-                "Content-Length: " + to_string(htmlContent.length()) + "\r\n"
-                "Connection: close\r\n\r\n" + htmlContent;
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: " + to_string(htmlContent.length()) + "\r\n"
+            "Connection: close\r\n\r\n" + htmlContent;
             /*
                 Notes : 
 
