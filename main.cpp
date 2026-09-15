@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include "titleScreen.cpp"
+#include <ctime>
 using namespace std;
 #pragma comment(lib, "ws2_32.lib")
 #define BUFFER_SIZE 4096
@@ -22,7 +23,9 @@ class ConnectionLog{
         this->buff = buff;
     }
     string info(){
-        return ("NEW CONNECTION ESTABLISHED \nListening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + this->path + "\n" + this->buff);
+        time_t currentTime = time(nullptr);
+        string time = ctime(&currentTime);
+        return ("NEW CONNECTION ESTABLISHED " + time + "\nListening socket : " + to_string(this->listening) + "\nAccepting socket : " + to_string(this->accepting) + "\nPort : " + to_string(this->port) + "\nAFINET MODE\nPath live : \n" + this->path + "\n" + this->buff);
     }
     ofstream report(){
         return ofstream("report.txt", ios::app);
@@ -129,6 +132,7 @@ int main()
         }
         closesocket(clientSocket);
     }
+    cout << "Lost connection"<<endl;
     closesocket(listenSocket);
     WSACleanup();
     return EXIT_SUCCESS;
